@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}
+  Ecoles
+{% endblock %}
+
+{% block content %}
+<div class="mt-10">
+    <div class="flex flex-row justify-between items-center mb-10">
+        <h1 class="text-2xl font-bold text-blue-500">Ecoles</h1>
+        <button data-modal-target="ecole-modal" data-modal-toggle="ecole-modal" type="button" class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          Modifier
+        </button>
+    </div>
+
+    <!-- Main modal -->
+    <div id="ecole-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Modifier Ecole
+                    </h3>
+                    <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="ecole-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-4 md:p-5">
+                    <form class="space-y-4" method="post" action="{% url "update_school" school.id %}">
+                      {% csrf_token %}
+                        <div>
+                          <label for="nom" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom</label>
+                          <input type="text" name="nom" id="nom" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" value="{{school.nom}}" required />
+                        </div>
+                        <div>
+                          <label for="adresse" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse</label>
+                          <input type="text" name="adresse" id="adresse" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" value="{{school.adresse}}" required />
+                        </div>
+                        <div>
+                          <label for="responsable" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Responsable</label>
+                          <input type="text" name="responsable" id="responsable" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" value="{{school.responsable}}" required />
+                        </div>
+                        <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Modifier compte</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div> 
+
+    {% if messages %}
+      <div>
+          {% for message in messages %}
+              <div class="border rounded p-4 alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                  {{ message }}
+              </div>
+          {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="justify-center w-full">
+        <div class="bg-white p-4 rounded max-w-xl flex justify-center">
+            <div class="flex flex-col w-full">
+                <div class="flex flex-col justify center space-y-4">
+                  <div class="bg-gray-300 w-md rounded">.</div>
+                  <h4 class="text-xl font-semibold text-center">{{school.nom}}</h4>
+                </div>
+                <ul>
+                    <li>Responsable : {{school.responsable}}</li>
+                    <li>Adresse : {{school.adresse}}</li>
+                </ul>
+                <div class="flex flex-row justify-around items-center my-4">
+                    <a href="{% url "professeurs" school.id %}" class="border rounded text-blue-500 p-2 hover:bg-gray-200">Professeseurs</a>
+                    <a href="{% url "classes" school.id %}" class="border rounded text-blue-500 p-2 hover:bg-gray-200">Classes</a>
+                    <a href="{% url "parents" school.id %}" class="border rounded text-blue-500 p-2 hover:bg-gray-200">Parents</a>
+                    <a href="{% url "eleves" school.id %}" class="border rounded text-blue-500 p-2 hover:bg-gray-200">Eleves</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}
+  Parents
+{% endblock %}
+
+{% block content %}
+<div class="mt-10">
+    <div class="flex flex-row justify-between items-center mb-10">
+        <h1 class="text-2xl font-bold text-blue-500"><a href="{% url "ecole_detail" ecole_id %}">{{school.nom}}</a> - Parents </h1>
+        <button data-modal-target="ecole-modal" data-modal-toggle="ecole-modal" type="button" class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          Ajouter
+        </button>
+    </div>
+
+    <!-- Main modal -->
+    <div id="ecole-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Création du compte parents
+                    </h3>
+                    <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="ecole-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-4 md:p-5">
+                    <form class="space-y-4" method="post" action="{% url "create_parents" ecole_id %}">
+                      {% csrf_token %}
+                      <div>
+                        <label for="nom-pere" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du père</label>
+                        <input type="text" name="nom_pere" id="nom_pere" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Nom du pere" required />
+                      </div>
+                      <div>
+                        <label for="nom_mere" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la mère</label>
+                        <input type="text" name="nom_mere" id="nom_mere" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Nom de la mere" required />
+                      </div>
+                      <div>
+                        <label for="phone_pere" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Téléphone du père</label>
+                        <input type="phone_pere" name="phone_pere" id="phone_pere" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="+243..." required />
+                      </div>
+                      <div>
+                        <label for="phone_mere" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Téléphone du père</label>
+                        <input type="phone_mere" name="phone_mere" id="phone_mere" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="+243..." required />
+                      </div>
+                      <div>
+                          <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                          <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="name@company.com" required />
+                      </div>
+                      <div>
+                        <label for="adresse" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse</label>
+                        <input type="text" name="adresse" id="adresse" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Adresse" required />
+                      </div>
+                      <div>
+                        <label for="nationalite" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nationalité</label>
+                        <input type="text" name="nationalite" id="nationalite" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Nationalité" required />
+                      </div>
+                      <div>
+                        <label for="nom_gardien" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du gardien</label>
+                        <input type="text" name="nom_gardien" id="nom_gardien" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Nom du gardien" required />
+                      </div>
+                      <div>
+                        <label for="phone_tuteur" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Téléphone du tuteur</label>
+                        <input type="text" name="phone_tuteur" id="phone_tuteur" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Nom du tuteur" required />
+                      </div><div>
+                        <label for="province" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Province</label>
+                        <input type="text" name="province" id="province" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Province" required />
+                      </div>
+                        <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Créer un compte</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div> 
+
+    {% if messages %}
+      <div>
+          {% for message in messages %}
+              <div class="border rounded p-4 alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                  {{ message }}
+              </div>
+          {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="relative overflow-x-auto">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Nom du père
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Nom du mère
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Email
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Adresse
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Date création
+                    </th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+              {% for parent in parents %}
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-200">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                      {{parent.nom_pere}}
+                    </th>
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        {{parent.nom_mere}}
+                      </th>
+                    <td class="px-6 py-4">
+                        {{parent.email}}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{parent.adresse}}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{parent.created_time}}
+                    </td>
+                    <td>
+                        <a href="#">Suprimer</a>
+                      </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+      </div>
+
+
+</div>
+{% endblock %}
