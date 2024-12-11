@@ -608,42 +608,146 @@ def create_eleve(request, ecole_id):
 
 
 @csrf_exempt
-def register_user(request):
+def create_parents_api(request, ecole_id):
     if request.method == "POST":
         try:
-            # Récupérer les données de la requête POST
+            # Charger les données JSON de la requête
             data = json.loads(request.body)
+
+            # Récupérer les données du parent
+            nom_pere = data.get("nom_pere")
+            nom_mere = data.get("nom_mere")
+            phone_pere = data.get("phone_pere")
+            phone_mere = data.get("phone_mere")
             email = data.get("email")
-            password = data.get("password")
+            adresse = data.get("adresse")
+            nationalite = data.get("nationalite")
+            nom_gardien = data.get("nom_gardien")
+            phone_tuteur = data.get("phone_tuteur")
+            province = data.get("province")
 
-            if not email or not password:
-                return JsonResponse({"error": "Email et mot de passe sont requis."}, status=400)
+            # Générer un mot de passe aléatoire
+            password = generate_password(8)
 
-            # Créer un nouvel utilisateur Firebase
-            user = auth.create_user(
-                email=email,
-                password=password
-            )
+            # Créer l'utilisateur Firebase
+            user = auth.create_user(email=email, password=password)
 
+            # Initialiser Firestore
             db = firestore.client()
+            created_time = firestore.SERVER_TIMESTAMP
+
+            # Ajouter les informations du parent dans la collection "parents"
+            parents_data = {
+                "nom_pere": nom_pere,
+                "nom_mere": nom_mere,
+                "telephone_pere": phone_pere,
+                "telephone_mere": phone_mere,
+                "email": email,
+                "adresse": adresse,
+                "nationalite": nationalite,
+                "nom_gardien": nom_gardien,
+                "phone_tuteur": phone_tuteur,
+                "province": province,
+                "created_time": created_time,
+                "user_id": user.uid,
+                "ecole": ecole_id,
+            }
+            parent_ref = db.collection("parents").add(parents_data)
+            parent_id = parent_ref[1].id  # Récupérer l'ID du document créé
 
             # Ajouter les informations utilisateur dans la collection "users"
             user_data = {
                 "email": email,
+                "display_name": nom_pere,
+                "phone_number": phone_pere,
                 "user_id": user.uid,
+                "compte_id": parent_id,  # Utiliser l'ID des parents ici
+                "is_professor": True,  # Modifier si ce champ est mal nommé
+                "created_time": created_time,
             }
             db.collection("users").document(user.uid).set(user_data)
 
-            # Réponse de succès avec les informations de l'utilisateur
+            # Réponse succès
             return JsonResponse({
-                "message": "Utilisateur créé avec succès.",
+                "message": f"Les parents '{nom_pere}' et '{nom_mere}' ont été créés avec succès.",
+                "parent_id": parent_id,
                 "user_id": user.uid,
-                "email": user.email
+                "password": password,
             }, status=201)
 
         except Exception as e:
-            # Gérer les erreurs et retourner un message d'erreur
+            # Réponse d'erreur
             return JsonResponse({"error": str(e)}, status=500)
 
-    # Si la requête n'est pas POST, retourner une erreur
+    # Réponse si la méthode n'est pas POST
+    return JsonResponse({"error": "Méthode non autorisée."}, status=405)
+
+
+
+@csrf_exempt
+def create_professor_api(request, ecole_id):
+    if request.method == "POST":
+        try:
+            # Charger les données JSON de la requête
+            data = json.loads(request.body)
+
+            # Récupérer les données du professeur
+            nom_professeur = data.get("nom")
+            email = data.get("email")
+            phone = data.get("phone")
+            sexe = data.get("sexe")
+            classe = data.get("classe")
+            adresse = data.get("adresse")
+
+            # Générer un mot de passe aléatoire
+            password = generate_password(8)
+
+            # Créer l'utilisateur Firebase
+            user = auth.create_user(email=email, password=password)
+
+            # Initialiser Firestore
+            db = firestore.client()
+            created_time = firestore.SERVER_TIMESTAMP
+
+            # Ajouter les informations du professeur dans la collection "professor"
+            professor_data = {
+                "nom": nom_professeur,
+                "telephone": phone,
+                "email": email,
+                "adresse": adresse,
+                "classe": classe,
+                "sexe": sexe,
+                "created_time": created_time,
+                "user_id": user.uid,
+                "ecole": ecole_id,
+            }
+            # Ajouter le document et récupérer l'ID
+            professor_ref = db.collection("professor").add(professor_data)
+            professor_id = professor_ref[1].id  # Récupérer l'ID du document créé
+
+            # Ajouter les informations utilisateur dans la collection "users"
+            user_data = {
+                "email": email,
+                "display_name": nom_professeur,
+                "phone_number": phone,
+                "user_id": user.uid,
+                "compte_id": professor_id,  # Utiliser l'ID du professeur ici
+                "is_professor": True,
+                "created_time": created_time,
+            }
+            db.collection("users").document(user.uid).set(user_data)
+
+            # Réponse succès
+            return JsonResponse({
+                "message": f"L'utilisateur '{nom_professeur}' a été créé avec succès.",
+                "professor_id": professor_id,
+                "user_id": user.uid,
+                "password": password,
+            }, status=201)
+
+        except Exception as e:
+            # Réponse d'erreur
+            return JsonResponse({"error": str(e)}, status=500)
+
+    # Réponse si la méthode n'est pas POST
     return JsonResponse({"error": "Méthode non autorisée."}, status=405)

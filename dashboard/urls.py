@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import home, ecoles, create_school, ecole_detail, update_school, create_professor, classes, create_classe, parents, create_parents, delete_parent,  eleves, create_eleve, professeurs, register_user
+from app.views import home, ecoles, create_school, ecole_detail, update_school, create_professor, classes, create_classe, parents, create_parents, delete_parent,  eleves, create_eleve, professeurs, create_parents_api, create_professor_api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +34,7 @@ urlpatterns = [
     path('create_classe/<str:ecole_id>', create_classe, name='create_classe'),
     path('eleves/<str:ecole_id>', eleves, name='eleves'),
     path('create_eleve/<str:ecole_id>', create_eleve, name='create_eleve'),
-    path("register-user/", register_user, name="register_user"),
+    path("create_parents_api/<str:ecole_id>", create_parents_api, name="create_parents_api"),
+    path("create_professor_api/<str:ecole_id>", create_professor_api, name="create_professor_api"),
 
 ]
