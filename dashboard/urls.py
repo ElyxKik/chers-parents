@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import home, ecoles, create_school, ecole_detail, update_school, create_professor, classes, create_classe, parents, create_parents, delete_parent,  eleves, create_eleve, professeurs, create_parents_api, create_professor_api
+from app.views import home, ecoles, create_school, ecole_detail, update_school, create_professor, classes, create_classe, parents, create_parents, delete_parent,  eleves, create_eleve, professeurs, create_parents_api, create_professor_api, get_professors_api, get_parents_api, get_eleves_api, get_classes_api, create_eleve_api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,5 +36,9 @@ urlpatterns = [
     path('create_eleve/<str:ecole_id>', create_eleve, name='create_eleve'),
     path("create_parents_api/<str:ecole_id>", create_parents_api, name="create_parents_api"),
     path("create_professor_api/<str:ecole_id>", create_professor_api, name="create_professor_api"),
-
+    path('api/professors/<str:ecole_id>/', get_professors_api, name='get_professors_api'),
+    path('api/parents/<str:ecole_id>/', get_parents_api, name='get_parents_api'),
+    path('api/eleves/<str:ecole_id>/', get_eleves_api, name='get_eleves_api'),
+    path('api/classes/<str:ecole_id>/', get_classes_api, name='get_classes_api'),
+    path('api/create_eleve/<str:ecole_id>/', create_eleve_api, name='create_eleve_api'),
 ]
