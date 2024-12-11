@@ -25,7 +25,26 @@ def generate_password(length=8):
 
 
 def home(request):
-    return render(request, 'home.html')
+    # Initialiser Firestore
+    db = firestore.client()
+    
+    try:
+        # Récupérer le nombre de documents dans chaque collection
+        nombre_ecole = len(list(db.collection('ecole').stream()))
+        nombre_professor = len(list(db.collection('professor').stream()))
+        nombre_classe = len(list(db.collection('classe').stream()))
+        nombre_eleve = len(list(db.collection('student').stream()))
+        
+        # Passer les données au template
+        return render(request, 'home.html', {
+            'nombre_ecole': nombre_ecole,
+            'nombre_professor': nombre_professor,
+            'nombre_classe': nombre_classe,
+            'nombre_eleve': nombre_eleve,
+        })
+    except Exception as e:
+        # En cas d'erreur, afficher un message dans le template
+        return render(request, 'home.html', {'error': str(e)})
 
 
 def ecoles(request):
@@ -605,6 +624,15 @@ def register_user(request):
                 email=email,
                 password=password
             )
+
+            db = firestore.client()
+
+            # Ajouter les informations utilisateur dans la collection "users"
+            user_data = {
+                "email": email,
+                "user_id": user.uid,
+            }
+            db.collection("users").document(user.uid).set(user_data)
 
             # Réponse de succès avec les informations de l'utilisateur
             return JsonResponse({
