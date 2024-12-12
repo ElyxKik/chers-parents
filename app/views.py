@@ -126,7 +126,7 @@ def create_school(request):
                 "display_name": nom_ecole,
                 "phone_number": phone,
                 "user_id": user.uid,
-                "compte_id": school_id,  # Utiliser l'ID de l'école ici
+                "compte_id": school_ref,  # Utiliser l'ID de l'école ici
                 "is_school": True,
                 "created_time": created_time,
             }
@@ -205,6 +205,8 @@ def create_professor(request, ecole_id):
             db = firestore.client()
             created_time = firestore.SERVER_TIMESTAMP
 
+            # Récupérer les détails de l'école
+            school_ref = db.collection("ecole").document(ecole_id)
 
             # Ajouter les informations du professeur dans la collection "professor"
             professor_data = {
@@ -216,7 +218,7 @@ def create_professor(request, ecole_id):
                 "sexe": sexe,
                 "created_time": created_time,
                 "user_id": user.uid,
-                "ecole": ecole_id,
+                "ecole": school_ref,
             }
             # Ajouter le document et récupérer la référence
             professor_ref = db.collection("professor").add(professor_data)
@@ -302,7 +304,7 @@ def parents(request, ecole_id):
         school = school_doc.to_dict()
 
         # Filtrer les professeurs associés à l'école
-        parents_ref = db.collection("parents").where("ecole", "==", ecole_id)
+        parents_ref = db.collection("parents").where("ecole", "==", db.collection("ecole").document(ecole_id))
         parents = [parent.to_dict() for parent in parents_ref.stream()]
 
         # Rendre le template avec les données
@@ -344,6 +346,14 @@ def create_parents(request, ecole_id):
             db = firestore.client()
             created_time = firestore.SERVER_TIMESTAMP
 
+            # Récupérer les détails de l'école
+            school_ref = db.collection("ecole").document(ecole_id)
+            school_doc = school_ref.get()
+
+            if not school_doc.exists:
+                return JsonResponse({"error": "L'école spécifiée n'existe pas."}, status=404)
+
+
             # Ajouter les informations du professeur dans la collection "professor"
             parents_data = {
                 "nom_pere": nom_pere,
@@ -358,7 +368,7 @@ def create_parents(request, ecole_id):
                 "province": province,
                 "created_time": created_time,
                 "user_id": user.uid,
-                "ecole": ecole_id
+                "ecole": school_ref
             }
             # Ajouter le document dans la collection "parents" et récupérer l'ID
             parent_ref = db.collection("parents").add(parents_data)
@@ -472,7 +482,7 @@ def classes(request, ecole_id):
         school = school_doc.to_dict()
 
         # Filtrer les classes associés à l'école
-        classe_ref = db.collection("classe").where("ecole", "==", ecole_id)
+        classe_ref = db.collection("classe").where("ecole", "==", db.collection("ecole").document(ecole_id))
         classe = [classe.to_dict() for classe in classe_ref.stream()]
 
         # Rendre le template avec les données
@@ -494,9 +504,17 @@ def create_classe(request, ecole_id):
         try:    
             db = firestore.client()
 
+            # Récupérer les détails de l'école
+            school_ref = db.collection("ecole").document(ecole_id)
+            school_doc = school_ref.get()
+
+            if not school_doc.exists:
+                return JsonResponse({"error": "L'école spécifiée n'existe pas."}, status=404)
+
+
             class_data = {
                 "nom": nom,
-                "ecole": ecole_id,
+                "ecole": school_ref,
                 "nombre_eleve": 0
             }
             db.collection("classe").add(class_data)
@@ -530,13 +548,13 @@ def eleves(request, ecole_id):
         school = school_doc.to_dict()
 
         # Filtrer les professeurs associés à l'école
-        eleves_ref = db.collection("student").where("ecole", "==", ecole_id)
+        eleves_ref = db.collection("student").where("ecole", "==", db.collection("ecole").document(ecole_id))
         eleves = [eleve.to_dict() for eleve in eleves_ref.stream()]
 
-        classe_ref = db.collection("classe").where("ecole", "==", ecole_id)
+        classe_ref = db.collection("classe").where("ecole", "==", db.collection("ecole").document(ecole_id))
         classes = [classe.to_dict() for classe in classe_ref.stream()]
 
-        parents_ref = db.collection("parents").where("ecole", "==", ecole_id)
+        parents_ref = db.collection("parents").where("ecole", "==", db.collection("ecole").document(ecole_id))
         parents = [parent.to_dict() for parent in parents_ref.stream()]
 
         # Rendre le template avec les données
@@ -571,6 +589,14 @@ def create_eleve(request, ecole_id):
             db = firestore.client()
             created_time = firestore.SERVER_TIMESTAMP
 
+            # Récupérer les détails de l'école
+            school_ref = db.collection("ecole").document(ecole_id)
+            school_doc = school_ref.get()
+
+            if not school_doc.exists:
+                return JsonResponse({"error": "L'école spécifiée n'existe pas."}, status=404)
+
+
             # Ajouter les informations du professeur dans la collection "professor"
             eleves_data = {
                 "nom": nom,
@@ -582,7 +608,7 @@ def create_eleve(request, ecole_id):
                 "email": email,
                 "telephone": telephone,
                 "classe": classe,
-                "ecole" : ecole_id,
+                "ecole" : school_ref,
                 "parents": parents,
                 "created_time": created_time,
             }
@@ -636,6 +662,14 @@ def create_parents_api(request, ecole_id):
             db = firestore.client()
             created_time = firestore.SERVER_TIMESTAMP
 
+            # Récupérer les détails de l'école
+            school_ref = db.collection("ecole").document(ecole_id)
+            school_doc = school_ref.get()
+
+            if not school_doc.exists:
+                return JsonResponse({"error": "L'école spécifiée n'existe pas."}, status=404)
+
+
             # Ajouter les informations du parent dans la collection "parents"
             parents_data = {
                 "nom_pere": nom_pere,
@@ -650,7 +684,7 @@ def create_parents_api(request, ecole_id):
                 "province": province,
                 "created_time": created_time,
                 "user_id": user.uid,
-                "ecole": ecole_id,
+                "ecole": school_ref,
             }
             parent_ref = db.collection("parents").add(parents_data)
             parent_id = parent_ref[1].id  # Récupérer l'ID du document créé
@@ -709,6 +743,14 @@ def create_professor_api(request, ecole_id):
             db = firestore.client()
             created_time = firestore.SERVER_TIMESTAMP
 
+            # Récupérer les détails de l'école
+            school_ref = db.collection("ecole").document(ecole_id)
+            school_doc = school_ref.get()
+
+            if not school_doc.exists:
+                return JsonResponse({"error": "L'école spécifiée n'existe pas."}, status=404)
+
+
             # Ajouter les informations du professeur dans la collection "professor"
             professor_data = {
                 "nom": nom_professeur,
@@ -719,7 +761,7 @@ def create_professor_api(request, ecole_id):
                 "sexe": sexe,
                 "created_time": created_time,
                 "user_id": user.uid,
-                "ecole": ecole_id,
+                "ecole": school_ref,
             }
             # Ajouter le document et récupérer l'ID
             professor_ref = db.collection("professor").add(professor_data)
@@ -781,7 +823,7 @@ def get_professors_api(request, ecole_id):
                 "school": school,
                 "professors": professors,
                 "classes": classes,
-                "ecole_id": ecole_id
+                "ecole_id": school_ref
             }, status=200)
 
         except Exception as e:
@@ -813,7 +855,7 @@ def get_parents_api(request, ecole_id):
         return JsonResponse({
             "school": school,
             "parents": parents,
-            "ecole_id": ecole_id,
+            "ecole_id": school_ref,
         }, status=200)
     
     except Exception as e:
@@ -851,7 +893,7 @@ def get_eleves_api(request, ecole_id):
         return JsonResponse({
             "school": school,
             "eleves": eleves,
-            "ecole_id": ecole_id,
+            "ecole_id": school_ref,
             "parents": parents,
             "classes": classes,
         }, status=200)
@@ -876,18 +918,54 @@ def get_classes_api(request, ecole_id):
         school = school_doc.to_dict()
 
         # Filtrer les classes associées à l'école
-        classe_ref = db.collection("classe").where("ecole", "==", ecole_id)
+        classe_ref = db.collection("classe").where("ecole", "==", db.collection("ecole").document(ecole_id))
         classes = [classe.to_dict() for classe in classe_ref.stream()]
 
         # Retourner les données en JSON
         return JsonResponse({
             "school": school,
             "classes": classes,
-            "ecole_id": ecole_id
+            "ecole_id": school_ref
         }, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    
+
+def create_classe_api(request, ecole_id):
+    if request.method == "POST":
+        try:
+            # Initialiser Firestore
+            db = firestore.client()
+
+            # Récupérer les données du corps de la requête
+            data = json.loads(request.body)
+            nom = data.get("nom")
+
+            if not nom:
+                return JsonResponse({"error": "Le nom de la classe est requis."}, status=400)
+
+            # Vérifier si l'école existe
+            school_ref = db.collection("ecole").document(ecole_id)
+            if not school_ref.get().exists:
+                return JsonResponse({"error": "L'école spécifiée n'existe pas."}, status=404)
+
+            # Créer les données pour la classe
+            class_data = {
+                "nom": nom,
+                "ecole": school_ref,
+                "nombre_eleve": 0
+            }
+
+            # Ajouter la classe dans Firestore
+            db.collection("classe").add(class_data)
+
+            return JsonResponse({"message": f"La classe '{nom}' a été créée avec succès."}, status=201)
+
+        except Exception as e:
+            return JsonResponse({"error": f"Une erreur s'est produite : {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Méthode non autorisée"}, status=405)
     
 
 def create_eleve_api(request, ecole_id):
@@ -931,9 +1009,9 @@ def create_eleve_api(request, ecole_id):
                 "nom": nom,
                 "prenom": prenom,
                 "date_naissance": date_naissance,
-                "classe_id": classe_id,
-                "parent_id": parent_id,
-                "ecole": ecole_id,
+                "classe_id": classe_ref,
+                "parent_id": parent_ref,
+                "ecole": school_ref,
                 "eleve_id": eleve_id
             }
             db.collection("student").document(eleve_id).set(eleve_data)
