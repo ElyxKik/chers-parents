@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from firebase_admin import auth, firestore
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
+from .forms import RegistrationForm, CustomAuthenticationForm
 from django.contrib import messages 
 from django.http import JsonResponse
 import json
@@ -9,6 +12,37 @@ import string
 
 
 # Create your views here.
+
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Connecte automatiquement l'utilisateur après l'inscription
+            return redirect('home')  # Remplacez 'home' par la vue souhaitée
+    else:
+        form = RegistrationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+
+def user_login(request):
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')  # Remplacez 'home' par la vue après connexion
+    else:
+        form = CustomAuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')  # Redirigez l'utilisateur après la déconnexion
 
 
 def generate_password(length=8):
@@ -47,6 +81,7 @@ def home(request):
         return render(request, 'home.html', {'error': str(e)})
 
 
+
 def ecoles(request):
     try:
         # Connexion à Firestore
@@ -70,18 +105,35 @@ def ecole_detail(request, school_id):
     school_ref = db.collection("ecole").document(school_id)
 
     try:
-        # Récupérer les données du document
+        # Récupérer les données du document de l'école
         school = school_ref.get()
         if school.exists:
             school_data = school.to_dict()
             school_data["id"] = school.id  # Inclure l'ID du document dans les données
+
+            # Initialiser la variable pour vérifier si l'école est activée
+            ecole_activated = False
+
+            # Récupérer l'utilisateur associé à l'école
+            user_ref = school_data.get("user")  # Peut être un DocumentReference
+            if isinstance(user_ref, firestore.DocumentReference):
+                user_id = user_ref.id  # Extraire l'ID du DocumentReference
+                user_doc = db.collection("users").document(user_id).get()
+                if user_doc.exists:
+                    user_data = user_doc.to_dict()
+                    ecole_activated = user_data.get("ecole_activated", False)
+
+            # Ajouter la variable ecole_activated aux données à transmettre au template
+            school_data["ecole_activated"] = ecole_activated
+
             return render(request, 'ecole_detail.html', {"school": school_data})
         else:
-            # Gérer le cas où le document n'existe pas
+            # Gérer le cas où le document de l'école n'existe pas
             return render(request, "404.html", {"error": "École introuvable"})
     except Exception as e:
         messages.error(request, f"Une erreur s'est produite : {str(e)}")
         return redirect("ecoles")
+
 
 
 def create_school(request):
@@ -179,6 +231,28 @@ def update_school(request, school_id):
     else:
         messages.error(request, f"École introuvable: {str(e)}")
         return redirect("ecole_detail", school_id)
+    
+
+def delete_school(request, school_id):
+    db = firestore.client()
+    school_ref = db.collection("ecole").document(school_id)
+
+    try:
+        # Vérifier si le document existe
+        school = school_ref.get()
+        if not school.exists:
+            messages.error(request, "L'école spécifiée n'existe pas.")
+            return redirect("ecoles")  # Rediriger vers la liste des écoles ou une autre page
+
+        # Supprimer le document
+        school_ref.delete()
+
+        messages.success(request, "L'école a été supprimée avec succès.")
+        return redirect("ecoles")  # Rediriger vers la liste des écoles après suppression
+
+    except Exception as e:
+        messages.error(request, f"Une erreur s'est produite : {str(e)}")
+        return redirect("ecoles")  # Rediriger vers une page appropriée en cas d'erreur
 
 
 def create_professor(request, ecole_id):
@@ -251,6 +325,58 @@ def create_professor(request, ecole_id):
 
     # Si ce n'est pas une requête POST
     return render(request, "professors.html")
+
+
+
+def activate_school(request, ecole_id):
+    try:
+        db = firestore.client()
+
+        # Récupérer le document de l'école
+        school_ref = db.collection("ecole").document(ecole_id)
+        school_doc = school_ref.get()
+
+        # Vérifier si l'école existe
+        if not school_doc.exists:
+            messages.error(request, "L'école spécifiée n'existe pas.")
+            return redirect("ecoles")  # Redirige vers la liste des écoles ou une autre page appropriée
+
+        # Récupérer le champ "user" du document de l'école
+        school_data = school_doc.to_dict()
+        user_ref = school_data.get("user")
+
+        # Vérifier si le champ "user" existe
+        if not user_ref:
+            messages.error(request, "Le champ 'user' est manquant dans le document de l'école.")
+            return redirect("ecole_detail", ecole_id)
+
+        # Extraire l'ID de l'utilisateur
+        if isinstance(user_ref, firestore.DocumentReference):
+            user_id = user_ref.id  # Si c'est un DocumentReference, extraire l'ID
+        else:
+            user_id = user_ref  # Si ce n'est pas un DocumentReference, utiliser directement
+
+        # Récupérer le document de l'utilisateur
+        user_ref = db.collection("users").document(user_id)
+        user_doc = user_ref.get()
+
+        # Vérifier si l'utilisateur existe
+        if not user_doc.exists:
+            messages.error(request, "L'utilisateur spécifié n'existe pas.")
+            return redirect("ecole_detail", ecole_id)
+
+        # Mettre à jour le champ "ecole_activated"
+        user_ref.update({"ecole_activated": True})
+
+        messages.success(request, "L'école et l'utilisateur associés ont été activés avec succès.")
+        return redirect("ecole_detail", ecole_id)  # Redirige vers la page de détails de l'école
+
+    except Exception as e:
+        # Gestion globale des exceptions
+        messages.error(request, f"Une erreur s'est produite : {str(e)}")
+        return redirect("ecole_detail", ecole_id)
+
+
 
 
 def professeurs(request, ecole_id):
@@ -663,6 +789,7 @@ def create_parents_api(request, ecole_id):
                 "user_id": user.uid,
                 "compte_id": parent_id,  # Utiliser l'ID des parents ici
                 "is_parents": True,  # Modifier si ce champ est mal nommé
+                "parents_ref": parent_ref,
                 "created_time": created_time,
             }
             db.collection("users").document(user.uid).set(user_data)
@@ -733,6 +860,7 @@ def create_professor_api(request, ecole_id):
                 "user_id": user.uid,
                 "compte_id": professor_id,  # Utiliser l'ID du professeur ici
                 "is_professor": True,
+                "prof_ref": professor_ref,
                 "created_time": created_time,
             }
             db.collection("users").document(user.uid).set(user_data)

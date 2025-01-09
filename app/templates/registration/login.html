@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <meta charset="utf-8" />
+        <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+    </head>
+
+    <body class="">
+        <div class="bg-gray-50 font-[sans-serif] h-screen">
+            <div class="min-h-screen flex flex-col items-center justify-center py-6 px-4">
+              <div class="max-w-md w-full">
+                <a href="javascript:void(0)">
+                <div class="flex flex-row space-x-2 items-center justify-center">
+                    <img src="{% static 'img/logo.png' %}" style="width:80px; height:80px" alt="" />
+                    <h2 class="text-medium font-semibold">Chers-Parents Admin</h2>
+                </div>
+                </a>
+      
+                <div class="p-8 rounded-2xl bg-white shadow">
+                  <h2 class="text-gray-800 text-center text-2xl font-bold my-5">Connexion</h2>
+                  <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="w-full mt-10 text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Se connecter</button>
+                </form>
+                </div>
+              </div>
+            </div>
+          </div>
+    </body>
+</html>

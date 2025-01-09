@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,10 @@
         <!-- Barre latérale -->
         <aside id="sidebar" class="bg-gray-800 text-gray-100 w-64 p-4 fixed md:relative z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="flex items-center justify-between mb-6 ">
-                <h2 class="text-lg font-semibold">Chers-Parents Admin</h2>
+                <div class="flex flex-row space-x-2 items-center">
+                    <img src="{% static 'img/logo.png' %}" style="width:40px; height:40px" alt="" />
+                    <h2 class="text-medium font-semibold">Chers-Parents Admin</h2>
+                </div>
                 <!-- Bouton Fermer -->
                 <button onclick="toggleSidebar()" class="text-gray-100 focus:outline-none md:hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
